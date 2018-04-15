@@ -3,9 +3,9 @@
 {% block content %}
     
     
-        <h1>Build a Blog</h1>
+        <h1 class = "heading">Build a Blog</h1>
         {% for blog in blogs %}
-            <a href = {{"/blog?id=" ~ blog.id}}>{{blog.title}}</a>
+            <h3 class="heading"><a href = {{"/blog?id=" ~ blog.id}}>{{blog.title}}</a></h3>
             <p> {{blog.body}} </p>
             <hr />
         {% endfor %}
