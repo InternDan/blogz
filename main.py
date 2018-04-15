@@ -41,17 +41,25 @@ def new_post():
     if request.method == "POST":
         blog_title = request.form["title"]
         blog_body = request.form["body"]
+        if blog_title:
+            blog_title.strip()
+        if blog_body:
+            blog_body.strip()
 
         if not blog_title and not blog_body:
             msg_title = "There is no title"
+            flash(msg_title,'title')
             msg_body = "There is no body"
-            return redirect("/newpost?msg_title=" +  msg_title + "&msg_body=" + msg_body)
+            flash(msg_body,'body')
+            return redirect("/newpost")
         if not blog_title:
             msg_title = "There is no title"
-            return redirect("/newpost?msg_title=" +  msg_title + "&blog_body=" + blog_body)
+            flash(msg_title,'title')
+            return redirect("/newpost?blog_body=" + blog_body)
         if not blog_body:
             msg_body = "There is no body"
-            return redirect("/newpost?msg_body=" + msg_body + "&blog_title=" + blog_title)
+            flash(msg_body,'body')
+            return redirect("/newpost?blog_title=" + blog_title)
         else:
             blog = Blog(blog_title,blog_body)
             db.session.add(blog)
@@ -62,18 +70,20 @@ def new_post():
             return redirect("/blog?id=" + str(new_id))     
 
     if request.method == "GET":
-        msg_title = request.args.get("msg_title")
-        msg_body = request.args.get("msg_body")
-
         blog_body = request.args.get("blog_body")
         blog_title = request.args.get("blog_title")
 
-        if msg_title and msg_body:
-            return render_template("newpost.html",msg_title=msg_title,msg_body=msg_body)
-        elif msg_title:
-            return render_template("newpost.html",msg_title=msg_title,blog_body=blog_body)
-        elif msg_body:
-            return render_template("newpost.html",msg_body=msg_body,blog_title=blog_title)
+        if blog_body:
+            blog_body.strip()
+        if blog_title:
+            blog_title.strip()
+
+        if blog_body and blog_title:
+            return render_template("newpost.html")
+        elif blog_title:
+            return render_template("newpost.html",blog_title=blog_title)
+        elif blog_body:
+            return render_template("newpost.html",blog_body=blog_body)
 
 
     return render_template("newpost.html")
