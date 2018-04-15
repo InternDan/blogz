@@ -2,9 +2,7 @@
 
 {% block content %}
     
-    {% if blogs|length == 0 %}
-    <p>No blog posts yet</p>
-    {% else %}
+    
         <h2>Your blog posts</h2>
         {% for blog in blogs %}
             <a href = {{"/blog?id=" ~ blog.id}}>{{blog.title}}</a>
@@ -12,8 +10,7 @@
             <hr />
         {% endfor %}
 
-    {% endif %}
-
+    
     <hr />
 
 {% endblock %}

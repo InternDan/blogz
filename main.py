@@ -18,12 +18,23 @@ class Blog(db.Model):
         self.title = title
         self.body = body
 
+    def __repr__(self):
+        return "<Blog(title='%s', body='%s')>" % (self.title, self.body)
+
 @app.route("/blog")
 def blog():
     blogs = Blog.query.all()
 
-    if blogs:
-        return render_template("blogs.html",title="Build a Blog!",blogs=blogs)
+    if request.method == "GET" and request.args.get("id"):
+        blog_id = request.args.get("id")
+        blogs = Blog.query.get(blog_id)
+        if blogs:
+            return render_template("blog.html",title="Build a Blog!",blog=blogs)
+
+    elif blogs:
+        blogs = Blog.query.all()
+        if blogs:
+            return render_template("blogs.html",title="Build a Blog!",blogs=blogs)
 
 @app.route("/newpost",methods = ["POST","GET"])
 def new_post():
@@ -45,8 +56,10 @@ def new_post():
             blog = Blog(blog_title,blog_body)
             db.session.add(blog)
             db.session.commit()
+            new_id = db.session.query(db.func.max(Blog.id)).scalar()
+            print(new_id)
 
-            return redirect("/blog")     
+            return redirect("/blog?id=" + str(new_id))     
 
     if request.method == "GET":
         msg_title = request.args.get("msg_title")
