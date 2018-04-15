@@ -2,7 +2,7 @@
 
 {% block content %}
 <p></p>
-<h1>Add a blog post</h1>
+<h1 class = "heading">Add a blog post</h1>
 <form method='post', action = "/newpost">
     <label>
         Post Title:
@@ -14,7 +14,7 @@
     <label>
         Post Body:
         <p></p>
-        <input type="text" name='body' value = {{blog_body}} >
+        <textarea name='body' rows = "30" cols = "100" value = {{blog_body}}> </textarea>
         <p class=error><strong>{{msg_body}}</strong></p>
     </label>
     <hr />
