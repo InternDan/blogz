@@ -5,12 +5,8 @@
     
         <h1 class = "heading">Build a Blog</h1>
         {% for blog in blogs %}
-            <h3 class="heading"><a href = {{"/blog?id=" ~ blog.id}}>{{blog.title}}</a></h3>
+            <h3><a href = {{"/blog?id=" ~ blog.id}}>{{blog.title}}</a></h3>
             <p> {{blog.body}} </p>
             <hr />
         {% endfor %}
-
-    
-    <hr />
-
 {% endblock %}
