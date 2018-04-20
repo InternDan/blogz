@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1 class = "heading">Build a Blog Entries for {{user.name}}</h1>
+    {% for blog in blogs %}
+        <h3>{{blog.title}}</h3>
+        <p> {{blog.body}} </p>
+        <hr />
+    {% endfor %}
+
+
+{% endblock %}
