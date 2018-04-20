@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, render_template, flash, session,flash
 from flask_sqlalchemy import SQLAlchemy
+import re
 
 app = Flask(__name__)
 
@@ -40,6 +41,31 @@ class Blog(db.Model):
     def __repr__(self):
         return "<Blog(title='%s', body='%s')>" % (self.title, self.body)
 
+def verify_username_validity(username):
+    error = ""
+    username.strip()
+    if len(username) > 2 and len(username) < 21 : #something there
+        error = ""
+    elif len(username) == 0:
+        error = "Enter a username between 3 and 20 characters"
+    elif len(username) < 3 or len(username) > 21:
+        error = "Enter a username between 3 and 20 characters"
+    return error
+
+def verify_password_validity(password,verify_password):
+    error = ""
+    pattern = re.compile(password)
+    if len(password) > 2 and len(password) < 21:
+        if pattern.match(verify_password) == False:
+            error = "Password and verification do not match"
+        if len(re.findall(r" ",password)) > 0:
+            error = "Username is not valid, has a space"
+    elif len(password) < 3 or len(password)>21:
+        error = "Password must be between 3 and 20 characters long and have no spaces"
+    else:
+        error = "Password must be between 3 and 20 characters long and have no spaces"
+
+    return error
 
 @app.route("/logoff")
 def logout():
@@ -61,7 +87,14 @@ def signup():
         password = request.form['password']
         verify = request.form['verify']
 
-        #validate stuff and return flash messages
+        error = []
+        error = verify_username_validity(username)
+        flash(error,"username")
+        error = verify_password_validity(password,verify)
+        flash(error,"password")
+
+        if error:
+            return redirect("/signup?username="+username)
 
         existing_user = User.query.filter_by(username=username).first()
         if not existing_user:
@@ -69,10 +102,18 @@ def signup():
             db.session.add(new_user)
             db.session.commit()
             session['username'] = username
+            print(session.get("username"))
             return redirect('/newpost')
         else:
             # TODO - user better response messaging with flash
             return "<h1>Username already taken!</h1>"
+    
+    if request.method=="GET":
+        username = request.args.get("username")
+        if username:
+            return render_template("signup.html",username=username)
+        else:
+            return render_template("signup.html",username='')
     
     return render_template("signup.html")
 
@@ -82,16 +123,24 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        #check username
-
-        #check password
+        error=None
+        user = User.query.filter_by(username=username).first()
+        if user:
+            password_real = user.password
+            if password != password_real:
+                error = "password is incorrect"
+                flash(error,"password")
+        else:
+            error = "not a registered username"
+            flash(error,"username")
+            
+        if error:
+            return redirect("/login")
 
         #if username and password correct
         session["username"] = username
         print(session)
         return redirect("/newpost")
-        ##elif username not in system
-        #return redirect("signup.html")
 
     return render_template("login.html")
 
@@ -100,21 +149,25 @@ def login():
 
 @app.route("/blog")
 def blog():
-    blogs = Blog.query.all()
-    users = User.query.all()
 
     if request.method == "GET" and request.args.get("postid"):
-        blog_id = request.args.get("id")
+        blog_id = request.args.get("postid")
         blogs = Blog.query.get(blog_id)
+        username = session.get("username")
+        user = User.query.filter_by(username=username).first()
+
         if blogs:
-            return render_template("blog.html",title="New Post",blogs=[blogs])
+            return render_template("blog.html",title="New Post",blogs=[blogs],users=[user])
 
     if request.method == "GET" and request.args.get("userid"):
         userid = request.args.get("userid")
         user = User.query.get(userid)
         user_id = user.id
-        blogs = Blog.query.get(user_id)
-        return render_template("blog.html",title=user.username +  " Posts",blogs=[blogs])
+        blogs = Blog.query.filter_by(owner_id=user.id).all()
+        return render_template("blog.html",title=user.username + " Posts",blogs=blogs)
+    
+    blogs = Blog.query.all()
+    users = User.query.all()
 
     return render_template("blog.html",blogs=blogs,users=users)
 

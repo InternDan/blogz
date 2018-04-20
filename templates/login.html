@@ -10,12 +10,26 @@
             <td>
                 <input name="username" type="test" value="{{ username }}">
             </td>
+            {% with errors = get_flashed_messages(category_filter=["username"]) %}
+                {% if errors %}
+                    {% for msg in errors %}
+                        <p class=error><strong>{{msg}}</strong></p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         </tr>
         <tr>
             <td><label for="password">Password</label></td>
             <td>
                 <input name="password" type="password">
             </td>
+            {% with errors = get_flashed_messages(category_filter=["password"]) %}
+                {% if errors %}
+                    {% for msg in errors %}
+                        <p class=error><strong>{{msg}}</strong></p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         </tr>
     </table>
     <input type="submit" value="Login">
