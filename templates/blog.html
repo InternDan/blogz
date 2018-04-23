@@ -5,7 +5,7 @@
     
     <h1 class = "heading">{{title}}</h1>
     {% for blog in blogs %}
-        <h3><a href = {{"/blog?id=" ~ blog.id}}>{{blog.title}}</a></h3>
+        <h3><a href = {{"/blog?postid=" ~ blog.id}}>{{blog.title}}</a></h3>
         <p> {{blog.body}} </p>
         {% for user in users %}
             {% if user.id == blog.owner_id %}

@@ -151,13 +151,14 @@ def login():
 def blog():
 
     if request.method == "GET" and request.args.get("postid"):
-        blog_id = request.args.get("postid")
-        blogs = Blog.query.get(blog_id)
+        post_id = request.args.get("postid")
+        blogs = Blog.query.get(post_id)
         username = session.get("username")
         user = User.query.filter_by(username=username).first()
+        print(username)
 
         if blogs:
-            return render_template("blog.html",title="New Post",blogs=[blogs],users=[user])
+            return render_template("blog.html",title="A Post by "+username,blogs=[blogs],users=[user])
 
     if request.method == "GET" and request.args.get("userid"):
         userid = request.args.get("userid")
