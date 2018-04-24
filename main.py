@@ -10,6 +10,7 @@ app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 app.secret_key = "weioha8e8aehfaservhnskeh"
 
+loggedIn = False
 
 class User(db.Model):
 
@@ -71,6 +72,7 @@ def verify_password_validity(password,verify_password):
 def logout():
     #delete user from session
     del session["username"]
+    loggedIn = False
     return redirect("/")
 
 
@@ -102,7 +104,6 @@ def signup():
             db.session.add(new_user)
             db.session.commit()
             session['username'] = username
-            print(session.get("username"))
             return redirect('/newpost')
         else:
             # TODO - user better response messaging with flash
@@ -133,13 +134,11 @@ def login():
         else:
             error = "not a registered username"
             flash(error,"username")
-            
         if error:
             return redirect("/login")
 
         #if username and password correct
         session["username"] = username
-        print(session)
         return redirect("/newpost")
 
     return render_template("login.html")
@@ -150,23 +149,30 @@ def login():
 @app.route("/blog")
 def blog():
 
-    if request.method == "GET" and request.args.get("postid"):
+    if request.method == "GET" and request.args.get("postid") and session.get("username"):
         post_id = request.args.get("postid")
         blogs = Blog.query.get(post_id)
-        username = session.get("username")
+        user_id = blogs.owner_id
+        user = User.query.get(user_id)
+        username = user.username
         user = User.query.filter_by(username=username).first()
-        print(username)
 
         if blogs:
-            return render_template("blog.html",title="A Post by "+username,blogs=[blogs],users=[user])
+            return render_template("blog.html",title="A Post by "+user.username,blogs=[blogs],users=[user])
 
-    if request.method == "GET" and request.args.get("userid"):
+    elif request.method == "GET" and request.args.get("userid") and session.get("username"):
         userid = request.args.get("userid")
         user = User.query.get(userid)
         user_id = user.id
         blogs = Blog.query.filter_by(owner_id=user.id).all()
         return render_template("blog.html",title=user.username + " Posts",blogs=blogs)
-    
+
+    elif request.method == "GET" and request.args.get("userid") and not session.get("username"):
+        return redirect("/login")
+
+    elif request.method == "GET" and request.args.get("postid") and not session.get("username"):
+        return redirect("/login")     
+
     blogs = Blog.query.all()
     users = User.query.all()
 
@@ -203,6 +209,9 @@ def new_post():
             db.session.add(blog)
             db.session.commit()
             new_id = db.session.query(db.func.max(Blog.id)).scalar()
+            print(user)
+            print(username)
+            print(new_id)
 
             return redirect("/blog?postid=" + str(new_id))     
 
